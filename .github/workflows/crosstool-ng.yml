@@ -35,8 +35,7 @@ jobs:
       - name: Build target
         run: |
           cd crosstool-ng-$CROSSTOOL_NG_VERSION
-          mkdir ./samples/arm-rpi-linux-gnueabihf/
-          cp ../.config ./samples/arm-rpi-linux-gnueabihf/
+          cp ../.config .
           export HOME=$GITHUB_WORKSPACE
           ./ct-ng build
 
