@@ -1,0 +1,57 @@
+name: Build toolchain
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    env:
+      CROSSTOOL_NG_VERSION: '1.26.0'
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install build-essential autoconf bison flex texinfo \
+            help2man gawk libtool libtool-bin libtool-doc libncurses5-dev python3-dev \
+            python3-distutils git unzip
+
+      - name: Download and build crosstool-ng
+        run: |
+          wget https://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_NG_VERSION.tar.xz
+          tar xf crosstool-ng-$CROSSTOOL_NG_VERSION.tar.bz2
+          cd crosstool-ng-$CROSSTOOL_NG_VERSION
+          ./configure --enable-local
+          make
+          sudo make install
+
+      - name: Configure target
+        run: |
+          cd crosstool-ng-$CROSSTOOL_NG_VERSION
+          mkdir ./samples/arm-rpi-linux-gnueabihf/
+          cp ../.config ./samples/arm-rpi-linux-gnueabihf/
+          ./ct-ng arm-rpi-linux-gnueabihf
+
+      - name: Build target
+        run: |
+          cd crosstool-ng-$CROSSTOOL_NG_VERSION
+          export HOME=$GITHUB_WORKSPACE
+          ./ct-ng build
+
+      - name: Package target
+        id: package
+        run: |
+          tar -zcvf arm-rpi-linux-gnueabihf.tar.gz -C /opt/ --exclude=build.log.bz2 arm-rpi-linux-gnueabihf
+
+      - name: Archive target
+        uses: actions/upload-artifact@v3
+        with:
+          name: toolchain
+          path: arm-rpi-linux-gnueabihf.tar.gz
