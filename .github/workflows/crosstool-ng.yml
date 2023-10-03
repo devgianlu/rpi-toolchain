@@ -1,14 +1,14 @@
 name: Build toolchain
+
 on:
   push:
-    branches:
-      - master
+    tags: [ 'v*' ]
 
 permissions:
   contents: write
 
 jobs:
-  compile:
+  build:
     runs-on: ubuntu-20.04
     env:
       CROSSTOOL_NG_VERSION: '1.26.0'
@@ -40,12 +40,10 @@ jobs:
           ./ct-ng build
 
       - name: Package target
-        id: package
-        run: |
-          tar -zcvf arm-rpi-linux-gnueabihf.tar.gz -C /opt/ --exclude=build.log.bz2 arm-rpi-linux-gnueabihf
+        run: tar -zcvf arm-rpi-linux-gnueabihf.tar.gz -C /opt/ --exclude=build.log.bz2 arm-rpi-linux-gnueabihf
 
-      - name: Archive target
-        uses: actions/upload-artifact@v3
+      - name: Release target
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: toolchain
-          path: arm-rpi-linux-gnueabihf.tar.gz
+          files: arm-rpi-linux-gnueabihf.tar.gz
