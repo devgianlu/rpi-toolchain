@@ -25,7 +25,7 @@ jobs:
 
       - name: Download and build crosstool-ng
         run: |
-          wget https://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_NG_VERSION.tar.xz
+          wget http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$CROSSTOOL_NG_VERSION.tar.xz
           tar xf crosstool-ng-$CROSSTOOL_NG_VERSION.tar.bz2
           cd crosstool-ng-$CROSSTOOL_NG_VERSION
           ./configure --enable-local
